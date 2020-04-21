@@ -186,6 +186,7 @@ import CoreGraphics
      */
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
+        setGestures()
     }
 
     /**
@@ -195,50 +196,30 @@ import CoreGraphics
         super.layoutSubviews()
         initialize()
     }
+    
+    private func setGestures() {
+        let gestureRecognizer = UILongPressGestureRecognizer(target:self, action: #selector(onNewGesture))
+        gestureRecognizer.minimumPressDuration = 0
+        self.addGestureRecognizer(gestureRecognizer)
+    }
+  
 }
 
 // MARK: - Touch Handling
 
 extension JoyStickView {
     /**
-     A touch began in the joystick view
-     - parameter touches: the set of UITouch instances, one for each touch event
-     - parameter event: additional event info (ignored)
+     Will be triggered in each new gesture
      */
-    public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first else { return }
-        updatePosition(touch: touch)
+    @objc public func onNewGesture(gesture: UILongPressGestureRecognizer) {
+        
+        if gesture.state == .changed {
+            updateLocation(location: gesture.location(in: superview!))
+        } else if gesture.state == .ended || gesture.state == .cancelled {
+            homePosition()
+        }
     }
-
-    /**
-     An existing touch has moved.
-     - parameter touches: the set of UITouch instances, one for each touch event
-     - parameter event: additional event info (ignored)
-     */
-    public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first else { return }
-        updatePosition(touch: touch)
-    }
-
-    /**
-     An existing touch event has been cancelled (probably due to system event such as an alert). Move joystick to
-     center of base.
-     - parameter touches: the set of UITouch instances, one for each touch event (ignored)
-     - parameter event: additional event info (ignored)
-     */
-    public override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        homePosition()
-    }
-
-    /**
-     User removed touch from display. Move joystick to center of base.
-     - parameter touches: the set of UITouch instances, one for each touch event (ignored)
-     - parameter event: additional event info (ignored)
-     */
-    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        homePosition()
-    }
-
+    
     /**
      Reset our base to the initial location before the user moved it. By default, this will take place
      whenever the user double-taps on the joystick handle.
@@ -365,13 +346,13 @@ extension JoyStickView {
         reportPosition()
     }
 
-    /**
-     Update the handle position based on the current touch location.
-     - parameter touch: the UITouch instance describing where the finger/pencil is
-     */
-    private func updatePosition(touch: UITouch) {
-        updateLocation(location: touch.location(in: superview!))
-    }
+//    /**
+//     Update the handle position based on the current touch location.
+//     - parameter touch: the UITouch instance describing where the finger/pencil is
+//     */
+//    private func updatePosition(touch: UIGestureRecognizer) {
+//        updateLocation(location: touch.location(in: superview!))
+//    }
 
     /**
      Update the location of the joystick based on the given touch location. Resulting behavior depends on `movable`
@@ -379,8 +360,8 @@ extension JoyStickView {
      - parameter location: the current handle position. NOTE: in coordinates of the superview
      */
     private func updateLocation(location: CGPoint) {
-        guard let superview = self.superview else { return }
-        guard superview.bounds.contains(location) else { return }
+//        guard let superview = self.superview else { return }
+//        guard superview.bounds.contains(location) else { return }
 
         let delta = location - frame.mid
         let newDisplacement = delta.magnitude / radius
