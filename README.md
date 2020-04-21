@@ -1,4 +1,8 @@
 
+
+# Changes
+Changed Joystick View to keep tracking the touch, even after leaving the original view (the joystick view)
+
 ## 👋 Hey! Check out the [Quake3-iOS](https://github.com/tomkidd/Quake3-iOS) repo (and others) by [tomkidd](https://github.com/tomkidd). He used this code for the movement control. Badge of honor 🏅 (or 🦡 of honor).
 
 [![Build Status](https://travis-ci.org/bradhowes/Joystick.svg?branch=master)](https://travis-ci.org/bradhowes/Joystick)
