@@ -202,20 +202,60 @@ import CoreGraphics
         gestureRecognizer.minimumPressDuration = 0
         self.addGestureRecognizer(gestureRecognizer)
     }
-  
+   // osApps changed --> added these
+    public var doubleTapDelegate: JVDoubleTapGestureDelegate? = nil
+    public var firstTapMade = false
+    
+    private var firstTapMaxDuration = 0.2
+    private var maxDurationBetweenTaps = 0.2
+    private var firstTapDownTime: TimeInterval = 0.0
+    private var firstTapUpTime: TimeInterval = 0.0
+    private var secondTapDownTime: TimeInterval = 0.0
+    private var onDoubleTapDown = false
+ 
+}
+
+// osApps changed --> changed the new gesture function
+
+public protocol JVDoubleTapGestureDelegate {
+    func onJVDoubleTap(jv: JoyStickView)
 }
 
 // MARK: - Touch Handling
 
 extension JoyStickView {
-    /**
+/**
      Will be triggered in each new gesture
      */
     @objc public func onNewGesture(gesture: UILongPressGestureRecognizer) {
-        
-        if gesture.state == .changed {
+        if gesture.state == .began {
+            if firstTapMade {
+                let durationBetweenTaps = Date.timeIntervalSinceReferenceDate - firstTapUpTime
+                if durationBetweenTaps < maxDurationBetweenTaps {
+                    secondTapDownTime = Date.timeIntervalSinceReferenceDate
+                    doubleTapDelegate?.onJVDoubleTap(jv: self)
+                    onDoubleTapDown = true
+                }
+            } else {
+                firstTapDownTime = Date.timeIntervalSinceReferenceDate
+            }
+        } else if gesture.state == .changed {
             updateLocation(location: gesture.location(in: superview!))
         } else if gesture.state == .ended || gesture.state == .cancelled {
+            if onDoubleTapDown {
+                onDoubleTapDown = false
+                firstTapMade = false
+                doubleTapDelegate?.onJVDoubleTap(jv: self)
+            } else {
+                let firstTapDuration = Date.timeIntervalSinceReferenceDate - firstTapDownTime
+                if firstTapDuration < firstTapMaxDuration {
+                    firstTapMade = true
+                    firstTapUpTime = Date.timeIntervalSinceReferenceDate
+                    //                tapDelegate?.onJVTap(jv: self)
+                } else {
+                    firstTapMade = false
+                }
+            }
             homePosition()
         }
     }
